@@ -32,31 +32,33 @@ int main() {
 
     printf("Server listening on port 8080...\n");
 
-    client_fd = accept(server_fd, (struct sockaddr*)&client_address, &client_length);
-    if (client_fd < 0) {
-        perror("accept failed");
-        exit(1);
+    while(1){
+        client_fd = accept(server_fd, (struct sockaddr*)&client_address, &client_length);
+        if (client_fd < 0) {
+            perror("accept failed");
+            exit(1);
+        }
+
+        printf("Client connected!\n");
+        int room_num = 31010;
+        char message[64];
+        snprintf(message, sizeof(message), "{\"room\": %d}\n", room_num);
+
+        char response[256];
+        snprintf(response, sizeof(response),  "HTTP/1.1 200 OK\r\n"
+        "Content-Type: application/json\r\n"
+        "Connection: keep-alive\r\n"
+        "Content-Length: %zu\r\n"
+        "\r\n"
+        "%s",
+        strlen(message), message);
+        ssize_t bytes_sent = send(client_fd, response, strlen(response), 0);
+        if(bytes_sent < 0 ){
+            perror("Couldn't send");
+        }
+        close(client_fd);
     }
-
-    printf("Client connected!\n");
-
-    int room_num = 31010;
-    char message[64];
-    snprintf(message, sizeof(message), "{\"room\": %d}\n", room_num);
-
-    char response[256];
-    snprintf(response, sizeof(response),  "HTTP/1.1 200 OK\r\n"
-    "Content-Type: application/json\r\n"
-    "Connection: keep-alive\r\n"
-    "Content-Length: %zu\r\n"
-    "\r\n"
-    "%s",
-    strlen(message), message);
-    ssize_t bytes_sent = send(client_fd, response, strlen(response), 0);
-    if(bytes_sent < 0 ){
-        perror("Couldn't send");
-    }
-    close(client_fd);
+    
     close(server_fd);
     return 0;
 }
