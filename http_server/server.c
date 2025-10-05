@@ -14,11 +14,13 @@ int main() {
             perror("socket failed");
             exit(1);
     }
-
+ 
     memset(&server_address, 0, sizeof(server_address));  
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = INADDR_ANY;      
     server_address.sin_port = htons(8080);
+
+    
 
     if (bind(server_fd, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
         perror("bind failed");
